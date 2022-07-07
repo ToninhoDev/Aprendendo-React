@@ -4,6 +4,7 @@ import  { Component } from 'react';
 import {Posts} from '../../../components/Posts';
 import {loadPosts} from '../../../utils/loadPosts';
 import { Button } from '../../Button';
+import {TextInput} from '../../../components/TextInput'
 
 
 class Home extends Component {
@@ -11,7 +12,8 @@ class Home extends Component {
       posts:[],
       allPosts: [],
       page: 0,
-      postPerPage: 3
+      postPerPage: 3,
+      searchValue: ''
     
   };
 
@@ -44,18 +46,50 @@ class Home extends Component {
     this.setState({posts, page: nextPage});
   }
 
+  handleChange = (e) =>{
+    const {value} = e.target;
+    this.setState({searchValue: value});
+
+  }
+
   render(){
-    const { posts, page, postPerPage, allPosts } = this.state;
+    const { posts, page, postPerPage, allPosts, searchValue } = this.state;
     const noMorePosts = page + postPerPage >= allPosts.length;
+
+    const filteredPosts = !!searchValue ? 
+    allPosts.filter(post => {
+      return post.title.toLowerCase().includes(
+        searchValue.toLowerCase());
+    })
+    : posts;
+
   return (
     <section className='container'>
-      <Posts posts={posts}/>
+      <div className='search-container'>
+      {!! searchValue && (
+        <h1>Search value: {searchValue}</h1>
+      )}
+      <TextInput searchValue={searchValue} 
+      handleChange={this.handleChange}/>
+       </div>
+
+      {filteredPosts.length > 0 && 
+      (<Posts posts={filteredPosts}/>)}
+
+      {filteredPosts.length === 0 && (
+        <p>Busca Não encontrada!</p>
+      )}
+      
       <div className='button-container'>
-      <Button 
-      text="Carregar Mais Posts"
-      onClick={this.loadMorePosts}
-      disabled={noMorePosts}
-      />
+        {!searchValue && (
+          <Button 
+          text="Carregar Mais Posts"
+          onClick={this.loadMorePosts}
+          disabled={noMorePosts}
+          />
+        )}
+      
+      
       </div>
     </section>
     
